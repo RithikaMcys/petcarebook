@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetCareBook | Automated Pet Vaccination & Deworming Tracker</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-shield-dog"></i>
+                </div>
+                <div class="brand-text">
+                    <h2>PetCareBook</h2>
+                    <span>VACCINATION & HEALTH</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="tab-due-soon">
+                    <i class="fa-solid fa-bell"></i>
+                    <span>Due in 7 Days</span>
+                    <span class="badge-alert" id="sidebar-due-badge">0</span>
+                </button>
+                <button class="nav-item" data-tab="tab-pets">
+                    <i class="fa-solid fa-paw"></i>
+                    <span>Pet Directory</span>
+                </button>
+                <button class="nav-item" data-tab="tab-records">
+                    <i class="fa-solid fa-syringe"></i>
+                    <span>Vaccination Records</span>
+                </button>
+                <button class="nav-item" data-tab="tab-history">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>Pet History</span>
+                </button>
+                <button class="nav-item" data-tab="tab-protocols">
+                    <i class="fa-solid fa-vial"></i>
+                    <span>Vaccine Protocols</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="/swagger-ui.html" target="_blank" class="api-doc-link">
+                    <i class="fa-solid fa-code"></i> Swagger API Docs
+                </a>
+                <div class="footer-note">
+                    <i class="fa-solid fa-shield-halved"></i> Schedule Integrity Active
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <header class="top-header">
+                <div>
+                    <h1 id="page-title">Vaccinations Due in Next 7 Days</h1>
+                    <p id="page-desc">Automated schedule alerts protecting pets from missed immunization windows.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline" id="btn-open-pet-modal">
+                        <i class="fa-solid fa-plus"></i> Register Pet
+                    </button>
+                    <button class="btn btn-primary" id="btn-open-vax-modal">
+                        <i class="fa-solid fa-syringe"></i> Log Vaccination
+                    </button>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- Top KPI Cards -->
+                <section class="kpi-grid">
+                    <div class="kpi-card card">
+                        <div class="kpi-icon blue"><i class="fa-solid fa-paw"></i></div>
+                        <div class="kpi-data">
+                            <span class="label">Total Registered Pets</span>
+                            <h3 id="stat-total-pets">0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card card">
+                        <div class="kpi-icon amber"><i class="fa-solid fa-clock"></i></div>
+                        <div class="kpi-data">
+                            <span class="label">Due in Next 7 Days</span>
+                            <h3 id="stat-due-soon" class="text-amber">0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card card">
+                        <div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div class="kpi-data">
+                            <span class="label">Overdue Vaccinations</span>
+                            <h3 id="stat-overdue" class="text-red">0</h3>
+                        </div>
+                    </div>
+                    <div class="kpi-card card">
+                        <div class="kpi-icon green"><i class="fa-solid fa-shield-virus"></i></div>
+                        <div class="kpi-data">
+                            <span class="label">Total Immunizations</span>
+                            <h3 id="stat-total-vax">0</h3>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 1: DUE IN 7 DAYS (Core Feature 4) -->
+                <section id="tab-due-soon" class="tab-pane active">
+                    <div class="card">
+                        <div class="card-header space-between">
+                            <div>
+                                <h2><i class="fa-solid fa-bell text-amber"></i> Priority Immunization Reminders</h2>
+                                <p>Pets with scheduled vaccine or deworming boosters due within the next 7 days.</p>
+                            </div>
+                            <span class="pill pill-warning"><span id="due-count-pill">0</span> Reminders Active</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="custom-table" id="due-soon-table">
+                                <thead>
+                                    <tr>
+                                        <th>Pet Name</th>
+                                        <th>Species & Breed</th>
+                                        <th>Vaccine Required</th>
+                                        <th>Next Due Date</th>
+                                        <th>Days Left</th>
+                                        <th>Owner & Contact</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="due-soon-tbody">
+                                    <tr><td colspan="7" class="text-center">Loading reminders...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 2: PET DIRECTORY (Core Feature 1) -->
+                <section id="tab-pets" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header space-between">
+                            <div>
+                                <h2>Registered Pets Directory</h2>
+                                <p>Manage pet profiles, age, breed information, and assigned owners.</p>
+                            </div>
+                            <div class="search-bar">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input type="text" id="pet-search-input" placeholder="Search by pet name, breed...">
+                                <select id="pet-species-filter">
+                                    <option value="ALL">All Species</option>
+                                    <option value="DOG">Dogs</option>
+                                    <option value="CAT">Cats</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pets-grid" id="pets-cards-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 3: ALL VACCINATION RECORDS -->
+                <section id="tab-records" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header space-between">
+                            <div>
+                                <h2>Complete Vaccination & Deworming Registry</h2>
+                                <p>Log of all immunizations administered, batch numbers, and calculated next due dates.</p>
+                            </div>
+                            <button class="btn btn-primary" onclick="openVaccinationModal()">
+                                <i class="fa-solid fa-plus"></i> New Record
+                            </button>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="custom-table" id="records-table">
+                                <thead>
+                                    <tr>
+                                        <th>Pet Name</th>
+                                        <th>Vaccine Name</th>
+                                        <th>Date Administered</th>
+                                        <th>Standard Interval</th>
+                                        <th>Next Due Date</th>
+                                        <th>Status</th>
+                                        <th>Clinic / Vet</th>
+                                        <th>Batch #</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="records-tbody">
+                                    <tr><td colspan="8" class="text-center">Loading vaccination records...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: PET COMPLETE VACCINATION HISTORY (Core Feature 5) -->
+                <section id="tab-history" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header space-between">
+                            <div>
+                                <h2>Pet Immunization & Deworming History</h2>
+                                <p>Select any registered pet to inspect their chronological medical history passport.</p>
+                            </div>
+                            <div class="form-group-inline">
+                                <label for="history-pet-select">Select Pet:</label>
+                                <select id="history-pet-select" class="form-control">
+                                    <option value="">-- Choose Pet --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="history-pet-overview" class="pet-passport-header hidden">
+                            <!-- Populated dynamically with Pet details -->
+                        </div>
+
+                        <div class="timeline-container" id="history-timeline-container">
+                            <div class="text-center text-muted" style="padding: 40px 0;">
+                                Please select a pet from the dropdown above to view their vaccination passport.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 5: VACCINE PROTOCOLS & INTERVALS -->
+                <section id="tab-protocols" class="tab-pane">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Standard Veterinary Vaccine Protocols</h2>
+                            <p>Fixed intervals used by PetCareBook to automatically compute upcoming immunization dates.</p>
+                        </div>
+                        <div class="protocols-grid" id="protocols-grid">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL 1: REGISTER PET (Core Feature 1) -->
+    <div class="modal-overlay hidden" id="modal-pet">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closePetModal()">&times;</button>
+            <h2><i class="fa-solid fa-paw"></i> Register New Pet</h2>
+            <form id="form-register-pet">
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Pet Name *</label>
+                        <input type="text" id="pet-name" class="form-control" placeholder="e.g. Milo" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Species *</label>
+                        <select id="pet-species" class="form-control" required>
+                            <option value="DOG">Dog</option>
+                            <option value="CAT">Cat</option>
+                            <option value="RABBIT">Rabbit</option>
+                            <option value="BIRD">Bird</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Breed *</label>
+                        <input type="text" id="pet-breed" class="form-control" placeholder="e.g. Golden Retriever" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Date of Birth *</label>
+                        <input type="date" id="pet-dob" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Gender</label>
+                        <select id="pet-gender" class="form-control">
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Weight (kg)</label>
+                        <input type="number" step="0.1" id="pet-weight" class="form-control" placeholder="e.g. 24.5">
+                    </div>
+                </div>
+
+                <div class="divider">Owner Contact Details</div>
+
+                <div class="form-group">
+                    <label>Owner Full Name *</label>
+                    <input type="text" id="pet-owner-name" class="form-control" placeholder="e.g. Rithika Sharma" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Owner Phone *</label>
+                        <input type="tel" id="pet-owner-phone" class="form-control" placeholder="+91 98401 12345" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Owner Email</label>
+                        <input type="email" id="pet-owner-email" class="form-control" placeholder="owner@example.com">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-3">
+                    <i class="fa-solid fa-check"></i> Register Pet Profile
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: LOG VACCINATION EVENT (Core Features 2 & 3) -->
+    <div class="modal-overlay hidden" id="modal-vaccination">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeVaccinationModal()">&times;</button>
+            <h2><i class="fa-solid fa-syringe"></i> Log Vaccination Event</h2>
+            <form id="form-log-vax">
+                <div class="form-group">
+                    <label>Select Pet *</label>
+                    <select id="vax-pet-select" class="form-control" required>
+                        <option value="">-- Choose Pet --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Vaccine / Preventative Type *</label>
+                    <select id="vax-type-select" class="form-control" required>
+                        <option value="">-- Choose Vaccine --</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Date Given * (Past or Today Only)</label>
+                        <input type="date" id="vax-date-given" class="form-control" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label>Batch / Lot Number</label>
+                        <input type="text" id="vax-batch" class="form-control" placeholder="e.g. RAB-2026-X1">
+                    </div>
+                </div>
+
+                <!-- Auto-calculation Live Preview Card -->
+                <div class="auto-calc-box">
+                    <div class="calc-row">
+                        <span>Standard Protocol Interval:</span>
+                        <strong id="calc-interval-text">-</strong>
+                    </div>
+                    <div class="calc-row highlight">
+                        <span>Auto-Calculated Next Due Date:</span>
+                        <strong id="calc-due-text" class="text-green">-</strong>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Veterinary Clinic / Administered By</label>
+                    <input type="text" id="vax-clinic" class="form-control" placeholder="e.g. City Veterinary Hospital">
+                </div>
+
+                <div class="form-group">
+                    <label>Veterinarian Notes</label>
+                    <textarea id="vax-notes" class="form-control" rows="2" placeholder="e.g. Annual booster administered. Pet in healthy condition."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-submit-vax">
+                    <i class="fa-solid fa-shield-virus"></i> Save Immunization Record
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="js/app.js"></script>
+</body>
+</html>
